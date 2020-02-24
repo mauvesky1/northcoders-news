@@ -3,8 +3,10 @@ const express = require("express");
 
 const app = express();
 
+const api_Router = require("./routes/api.router");
+
 app.use(express.json());
 
-app.use("/api", api_router);
+app.use("/api", api_Router);
 
 module.exports = app;
