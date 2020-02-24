@@ -9,11 +9,20 @@ const { formatDates, formatComments, makeRefObj } = require("../utils/utils");
 
 exports.seed = function(knex) {
   const topicsInsertions = knex("topics").insert(topicData);
-  const usersInsertions = knex("users").insert(userData);
 
-  return Promise.all([topicsInsertions, usersInsertions])
+  const usersInsertions = knex("users").insert(userData);
+  return knex.migrate
+    .rollback()
+    .then(() => knex.migrate.latest())
+    .then(() => {
+      return Promise.all([topicsInsertions, usersInsertions]);
+    })
     .then(() => {
       /* 
+      return knex.migrate
+    .rollback()
+    .then(() => knex.migrate.latest())
+    .then(() => {
       
       Your article data is currently in the incorrect format and will violate your SQL schema. 
       
@@ -47,6 +56,7 @@ exports.seed = function(knex) {
           return knex("comments").insert(formattedComments);
         });
       */
+      console.log(commentData);
       const articleRef = makeRefObj(articleRows);
       const formattedComments = formatComments(commentData, articleRef);
       return knex("comments").insert(formattedComments);

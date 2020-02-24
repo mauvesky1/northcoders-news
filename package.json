@@ -9,8 +9,10 @@
     "test-utils": "mocha spec/utils.spec.js",
     "migrate-make": "knex migrate:make",
     "migrate-latest": "knex migrate:latest",
+    "migrate-rollback": "knex migrate:rollback --all",
     "test": "mocha spec/app.spec.js",
-    "view": " npm run setup-dbs && npm run migrate-latest && npm run seed && psql -f view.sql -o view.txt"
+    "setup": "npm run setup-dbs && NODEnpm run migrate-latest",
+    "view": " npm run setup-dbs &&  npm run migrate-latest && npm run seed && psql -f view.sql -o view.txt"
   },
   "repository": {
     "type": "git",
@@ -25,10 +27,13 @@
   "homepage": "https://github.com/northcoders/be-nc-news#readme",
   "dependencies": {
     "chai": "^4.2.0",
+    "express": "^4.17.1",
     "knex": "^0.20.10",
     "mocha": "^7.0.1",
     "pg": "^7.18.2",
     "supertest": "^4.0.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "sams-chai-sorted": "^1.0.2"
+  }
 }
