@@ -1,6 +1,6 @@
-\c nc_news;
+\c nc_news_test;
 
 
 
-SELECT * FROM users;
+SELECT * FROM comments ;
 

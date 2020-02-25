@@ -2,7 +2,8 @@ const { expect } = require("chai");
 const {
   formatDates,
   makeRefObj,
-  formatComments
+  formatComments,
+  comment_count
 } = require("../db/utils/utils");
 
 describe("formatDates", () => {

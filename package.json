@@ -11,8 +11,8 @@
     "migrate-latest": "knex migrate:latest",
     "migrate-rollback": "knex migrate:rollback --all",
     "test": "mocha spec/app.spec.js",
-    "setup": "npm run setup-dbs && NODEnpm run migrate-latest",
-    "view": " npm run setup-dbs &&  npm run migrate-latest && npm run seed && psql -f view.sql -o view.txt"
+    "setup": "npm run setup-dbs && npm run migrate-latest",
+    "view": " npm run setup-dbs &&  npm run migrate-latest && NODE_ENV=test npm run seed && psql -f view.sql -o view.txt"
   },
   "repository": {
     "type": "git",
