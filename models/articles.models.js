@@ -33,7 +33,7 @@ patchArticle = ({ article_id }, { inc_votes }) => {
       return result[0];
     });
 };
-fetchArticles = ({ sort_by = "title", order_by = "desc", author }) => {
+fetchArticles = ({ sort_by = "title", order_by = "desc", author, topic }) => {
   if (order_by !== "asc" && order_by !== "desc") {
     order_by = "desc";
   }
@@ -49,19 +49,36 @@ fetchArticles = ({ sort_by = "title", order_by = "desc", author }) => {
       if (author) {
         query.where("articles.author", author);
       }
+      if (topic) {
+        query.where("articles.topic", topic);
+      }
     })
     .then(result => {
       result.forEach(article => {
         delete article.body;
       });
-      if (result.length === 0) {
+      if (result.length === 0 && author && topic) {
+        return Promise.all([
+          result,
+          checkAuthorExists(author),
+          checkTopicExists(topic)
+        ]);
+      } else if (result.length === 0 && topic) {
+        return Promise.all([result, , checkTopicExists(topic)]);
+      } else if (result.length === 0 && author) {
         return Promise.all([result, checkAuthorExists(author)]);
+      } else {
+        return Promise.all([result]);
       }
-
-      return Promise.all([result]);
     })
     .then(result => {
-      if (result[1] === true || result[1] === undefined) {
+      console.log(result[1], result[2]);
+      if (
+        (result[1] === true && result[2] === true) ||
+        (result[1] === undefined && result[2] === true) ||
+        (result[1] === undefined && result[2] === undefined) ||
+        (result[1] === true && result[2] === undefined)
+      ) {
         return result[0];
       } else {
         return Promise.reject({ status: 404, msg: "Nothing found" });
@@ -74,6 +91,18 @@ checkAuthorExists = author => {
     .select("username")
     .from("users")
     .where("username", author)
+    .then(list => {
+      if (list.length !== 0) {
+        return true;
+      } else return false;
+    });
+};
+
+checkTopicExists = topic => {
+  return knex
+    .select("slug")
+    .from("topics")
+    .where("slug", topic)
     .then(list => {
       if (list.length !== 0) {
         return true;

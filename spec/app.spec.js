@@ -229,7 +229,7 @@ describe("/api", () => {
         });
     });
   });
-  describe("/api/articles", () => {
+  describe.only("/api/articles", () => {
     it("GET all articles", () => {
       return request(app)
         .get("/api/articles")
@@ -288,7 +288,7 @@ describe("/api", () => {
           expect(body.articles).to.be.sortedBy("title", { descending: true });
         });
     });
-    it("Filter the articles by the username value specified in the query", () => {
+    it("Filters the articles by the username value specified in the query", () => {
       return request(app)
         .get("/api/articles?author=rogersop")
         .expect(200)
@@ -309,6 +309,51 @@ describe("/api", () => {
     it("Returns an empty array if the author selected does not have any associated articles", () => {
       return request(app)
         .get("/api/articles?author=lurker")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.eql([]);
+        });
+    });
+    it("Filters the articles by the topics value specified in the query", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(({ body }) => {
+          body.articles.forEach(article => {
+            expect(article.topic).to.equal("mitch");
+          });
+        });
+    });
+    it("ERROR: Throws an error if the topic selected in the query does not exist", () => {
+      return request(app)
+        .get("/api/articles?topic=notATopic")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Nothing found");
+        });
+    });
+    it("Returns an empty array if the topic selected does not have any associated articles", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.eql([]);
+        });
+    });
+    it.only("Filters by both author and topic", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch&&author=rogersop")
+        .expect(200)
+        .then(({ body }) => {
+          body.articles.forEach(article => {
+            expect(article.topic).to.equal("mitch");
+            expect(article.author).to.equal("rogersop");
+          });
+        });
+    });
+    it.only("Returns an empty array if a search is made for a topic and an author that both have no associated articles", () => {
+      return request(app)
+        .get("/api/articles?topic=paper&&author=lurker")
         .expect(200)
         .then(({ body }) => {
           expect(body.articles).to.eql([]);

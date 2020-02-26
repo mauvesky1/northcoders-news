@@ -49,7 +49,10 @@ const getArticles = (req, res, next) => {
     .then(articles => {
       res.send({ articles });
     })
-    .catch(next);
+    .catch(err => {
+      console.log(err);
+      next(err);
+    });
 };
 module.exports = {
   getArticleById,
