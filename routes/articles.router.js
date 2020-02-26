@@ -7,15 +7,22 @@ const {
   getArticles
 } = require("../controllers/articles.controller");
 
-articles_Router.route("/").get(getArticles);
+const { methodNotAllowed } = require("../errors/errors");
+
+articles_Router
+  .route("/")
+  .get(getArticles)
+  .all(methodNotAllowed);
 articles_Router
   .route("/:article_id")
   .get(getArticleById)
-  .patch(updateArticle);
+  .patch(updateArticle)
+  .all(methodNotAllowed);
 
 articles_Router
   .route("/:article_id/comments")
   .post(createComment)
-  .get(getCommentsById);
+  .get(getCommentsById)
+  .all(methodNotAllowed);
 
 module.exports = articles_Router;

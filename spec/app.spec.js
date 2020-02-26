@@ -17,7 +17,13 @@ describe("/api", () => {
   beforeEach(() => {
     return connection.seed.run();
   });
+
   describe("/topics", () => {
+    it("Returns 405 if the method is not allowed", () => {
+      return request(app)
+        .delete("/api/topics")
+        .expect(405);
+    });
     it("GET 200: responds with 200 and all topics", () => {
       return request(app)
         .get("/api/topics")
@@ -30,6 +36,11 @@ describe("/api", () => {
     });
   });
   describe("/users/:username", () => {
+    it("Returns 405 if the method is not allowed", () => {
+      return request(app)
+        .delete("/api/users/1")
+        .expect(405);
+    });
     it("GETs a user object by its id", () => {
       return request(app)
         .get("/api/users/rogersop")
@@ -48,6 +59,11 @@ describe("/api", () => {
     });
   });
   describe("/articles/:article_id", () => {
+    it("Returns 405 if the method is not allowed", () => {
+      return request(app)
+        .delete("/api/articles/1")
+        .expect(405);
+    });
     it("GETs an article by its id", () => {
       return request(app)
         .get("/api/articles/1")
@@ -153,6 +169,11 @@ describe("/api", () => {
     });
   });
   describe("/api/articles/:article_id/comments", () => {
+    it("Returns 405 if the method is not allowed", () => {
+      return request(app)
+        .delete("/api/articles/1/comments")
+        .expect(405);
+    });
     it("POST a comment to the database", () => {
       return request(app)
         .post("/api/articles/1/comments")
@@ -275,6 +296,11 @@ describe("/api", () => {
     });
   });
   describe("/api/articles", () => {
+    it("Returns 405 if the method is not allowed", () => {
+      return request(app)
+        .delete("/api/articles")
+        .expect(405);
+    });
     it("GET all articles", () => {
       return request(app)
         .get("/api/articles")
@@ -406,6 +432,11 @@ describe("/api", () => {
     });
   });
   describe("/api/comments/comment_id", () => {
+    it("Returns 405 if the method is not allowed", () => {
+      return request(app)
+        .put("/api/comments/comment_id")
+        .expect(405);
+    });
     it("PATCH: updates the votes property of a comment", () => {
       return request(app)
         .patch("/api/comments/1")
@@ -444,9 +475,17 @@ describe("/api", () => {
     it("ERROR: Non-existent inc_votes", () => {
       return request(app)
         .patch("/api/comments/1")
-        .expect(400)
+        .expect(200)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Missing votes input");
+          expect(body.comment.votes).to.equal(16);
+          expect(body.comment).to.have.keys(
+            "comment_id",
+            "author",
+            "article_id",
+            "body",
+            "created_at",
+            "votes"
+          );
         });
     });
     it("Ignores other keys in the request body", () => {

@@ -11,9 +11,7 @@ const getArticleById = (req, res, next) => {
     .then(article => {
       res.send({ article });
     })
-    .catch(err => {
-      next(err);
-    });
+    .catch(next);
 };
 
 const updateArticle = (req, res, next) => {
@@ -29,9 +27,7 @@ const createComment = (req, res, next) => {
     .then(comment => {
       res.status(201).send({ comment });
     })
-    .catch(err => {
-      next(err);
-    });
+    .catch(next);
 };
 
 const getCommentsById = (req, res, next) => {
@@ -47,9 +43,7 @@ const getArticles = (req, res, next) => {
     .then(articles => {
       res.send({ articles });
     })
-    .catch(err => {
-      next(err);
-    });
+    .catch(next);
 };
 module.exports = {
   getArticleById,

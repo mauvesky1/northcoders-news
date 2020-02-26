@@ -45,14 +45,16 @@ exports.fetchCommentsById = (
     });
 };
 exports.patchComment = ({ comment_id }, { inc_votes }) => {
-  if (inc_votes === undefined) {
-    return Promise.reject({ status: 400, msg: "Missing votes input" });
-  }
   return knex
     .select("*")
     .from("comments")
     .where("comment_id", comment_id)
-    .increment("votes", inc_votes)
+    .modify(query => {
+      if (inc_votes) {
+        query.increment("votes", inc_votes);
+      }
+    })
+
     .returning("*")
     .then(result => {
       if (result.length === 0) {

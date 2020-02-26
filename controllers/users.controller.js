@@ -5,9 +5,7 @@ const getUserById = (req, res, next) => {
     .then(user => {
       res.send({ user });
     })
-    .catch(err => {
-      next(err);
-    });
+    .catch(next);
 };
 
 module.exports = { getUserById };
