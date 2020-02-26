@@ -1,6 +1,9 @@
 const knex = require("../db/connection");
 
 exports.postComment = ({ article_id }, { username, body }) => {
+  if (username === undefined || body === undefined) {
+    return Promise.reject({ status: 400, msg: "Missing a necessary key" });
+  }
   return knex
     .insert({ author: username, body, article_id })
     .into("comments")
@@ -31,13 +34,5 @@ exports.fetchCommentsById = (
         delete item.article_id;
       });
       return result;
-    });
-};
-exports.comment_count = article_id => {
-  return knex("comments")
-    .count("article_id")
-    .where("article_id", "=", article_id)
-    .then(result => {
-      return result[0].count;
     });
 };

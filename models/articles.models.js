@@ -1,24 +1,20 @@
 const knex = require("../db/connection");
-const { comment_count } = require("./comments.models");
 
 exports.fetchArticleById = ({ article_id }) => {
   return knex
-    .select("*")
+    .select("articles.*")
     .from("articles")
-    .where("article_id", "=", article_id)
+    .where("articles.article_id", "=", article_id)
+    .count({ comment_count: "comment_id" })
+    .leftJoin("comments", "articles.article_id", "comments.article_id")
+    .groupBy("articles.article_id")
     .then(article => {
       if (article.length === 0) {
         return Promise.reject({ status: 404, msg: "Nothing found" });
       }
-      // const comment_countv = knex("comments")
-      //   .count("article_id")
-      //   .where("article_id", "=", article_id);
-
-      return Promise.all([article[0], comment_count(article_id)]);
+      return article[0];
     })
-    .then(([article, comment_count]) => {
-      console.log(comment_count);
-      article.comment_count = comment_count;
+    .then(article => {
       return article;
     });
 };
@@ -37,19 +33,30 @@ exports.patchArticle = ({ article_id }, { inc_votes }) => {
       return result[0];
     });
 };
-exports.fetchArticles = () => {
+exports.fetchArticles = ({ sort_by = "title", order_by = "desc", author }) => {
+  if (order_by !== "asc" && order_by !== "desc") {
+    order_by = "desc";
+  }
   return knex
-    .select("*")
+    .select("articles.*")
     .from("articles")
+    .count({ comment_count: "comment_id" })
+    .leftJoin("comments", "articles.article_id", "comments.article_id")
+    .groupBy("articles.article_id")
+
+    .orderBy(sort_by, order_by)
+    .modify(query => {
+      if (author) {
+        query.where("articles.author", author);
+      }
+    })
     .then(result => {
       if (result.length === 0) {
         return Promise.reject({ status: 404, msg: "Nothing found" });
       }
       result.forEach(article => {
-        article.comment_count = comment_count(article.article_id);
         delete article.body;
       });
-
       return result;
     });
 };

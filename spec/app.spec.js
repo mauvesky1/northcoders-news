@@ -38,9 +38,9 @@ describe("/api", () => {
           expect(body.user).to.have.keys("username", "name", "avatar_url");
         });
     });
-    it("ERROR: Returns a 404 error if the user enters an incorrect datatype", () => {
+    it("ERROR: Returns a 404 error if the user is nonexistent", () => {
       return request(app)
-        .get("/api/users/1")
+        .get("/api/users/doesnotexist1")
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).to.equal("Nothing found");
@@ -110,9 +110,18 @@ describe("/api", () => {
     it("ERROR: Patches an invalid article_id", () => {
       return request(app)
         .patch("/api/articles/notanumber")
+        .send({ inc_votes: 44 })
         .expect(400)
         .then(({ body }) => {
           expect(body.msg).to.eql("Invalid input");
+        });
+    });
+    it("ERROR: Non-existent inc_votes", () => {
+      return request(app)
+        .patch("/api/articles/notanumber")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid input");
         });
     });
   });
@@ -143,15 +152,13 @@ describe("/api", () => {
           expect(body.msg).to.equal("Invalid input");
         });
     });
-    it("ERROR: Dealing with a -422-", () => {
+    it("ERROR: Missing a necessary key", () => {
       return request(app)
         .post("/api/articles/1/comments")
-        .send({ username: "Bravo", body: "This is the body" })
-        .expect(404)
+        .send({ body: "This is the body" })
+        .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal(
-            "Not Found; either a parameter does not exist or the body is missing a necessary key"
-          );
+          expect(body.msg).to.equal("Missing a necessary key");
         });
     });
     it("GET: returns with all comments for a specific article", () => {
@@ -237,6 +244,58 @@ describe("/api", () => {
             "votes",
             "comment_count"
           );
+          expect(body.articles[0]);
+        });
+    });
+    it("Accepts a sort_by query", () => {
+      return request(app)
+        .get("/api/articles?sort_by=topic")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.sortedBy("topic", { descending: true });
+        });
+    });
+
+    it("ERROR: 404 not found when sorting by a query that doesn't exist", () => {
+      return request(app)
+        .get("/api/articles?sort_by=missingColumn")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Column Not Found in database");
+        });
+    });
+    it("Accepts an order_by query", () => {
+      return request(app)
+        .get("/api/articles?sort_by=topic&&order_by=asc")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.sortedBy("topic", { ascending: true });
+        });
+    });
+    it("Defaults to sort_by title in descending order", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.sortedBy("title", { descending: true });
+        });
+    });
+    it("Defaults to desc order if order_by is not asc or desc", () => {
+      return request(app)
+        .get("/api/articles?order_by=thi1s1sn0tr1ght")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.sortedBy("title", { descending: true });
+        });
+    });
+    it("Filter the articles by the username value specified in the query", () => {
+      return request(app)
+        .get("/api/articles?author=rogersop")
+        .expect(200)
+        .then(({ body }) => {
+          body.articles.forEach(article => {
+            expect(article.author).to.equal("rogersop");
+          });
         });
     });
   });
