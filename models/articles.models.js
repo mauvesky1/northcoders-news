@@ -1,6 +1,6 @@
 const knex = require("../db/connection");
 
-exports.fetchArticleById = ({ article_id }) => {
+fetchArticleById = ({ article_id }) => {
   return knex
     .select("articles.*")
     .from("articles")
@@ -19,7 +19,7 @@ exports.fetchArticleById = ({ article_id }) => {
     });
 };
 
-exports.patchArticle = ({ article_id }, { inc_votes }) => {
+patchArticle = ({ article_id }, { inc_votes }) => {
   return knex
     .select("*")
     .from("articles")
@@ -33,7 +33,7 @@ exports.patchArticle = ({ article_id }, { inc_votes }) => {
       return result[0];
     });
 };
-exports.fetchArticles = ({ sort_by = "title", order_by = "desc", author }) => {
+fetchArticles = ({ sort_by = "title", order_by = "desc", author }) => {
   if (order_by !== "asc" && order_by !== "desc") {
     order_by = "desc";
   }
@@ -51,12 +51,39 @@ exports.fetchArticles = ({ sort_by = "title", order_by = "desc", author }) => {
       }
     })
     .then(result => {
-      if (result.length === 0) {
-        return Promise.reject({ status: 404, msg: "Nothing found" });
-      }
       result.forEach(article => {
         delete article.body;
       });
-      return result;
+      if (result.length === 0) {
+        return Promise.all([result, checkAuthorExists(author)]);
+      }
+
+      return Promise.all([result]);
+    })
+    .then(result => {
+      if (result[1] === true || result[1] === undefined) {
+        return result[0];
+      } else {
+        return Promise.reject({ status: 404, msg: "Nothing found" });
+      }
     });
+};
+
+checkAuthorExists = author => {
+  return knex
+    .select("username")
+    .from("users")
+    .where("username", author)
+    .then(list => {
+      if (list.length !== 0) {
+        return true;
+      } else return false;
+    });
+};
+
+module.exports = {
+  fetchArticleById,
+  patchArticle,
+  fetchArticles,
+  checkAuthorExists
 };

@@ -298,5 +298,21 @@ describe("/api", () => {
           });
         });
     });
+    it("ERROR: Throws an error if the author selected in the query does not exist", () => {
+      return request(app)
+        .get("/api/articles?author=notanAuthor")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.eql("Nothing found");
+        });
+    });
+    it("Returns an empty array if the author selected does not have any associated articles", () => {
+      return request(app)
+        .get("/api/articles?author=lurker")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.eql([]);
+        });
+    });
   });
 });
