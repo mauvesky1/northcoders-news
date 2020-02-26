@@ -3,4 +3,4 @@ const { getTopics } = require("../controllers/topics.controller");
 
 topics_Router.route("/").get(getTopics);
 
-module.exports = { topics_Router };
+module.exports = topics_Router;

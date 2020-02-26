@@ -23,7 +23,7 @@ exports.handlePSQLErrors = (err, req, res, next) => {
         msg:
           "Not Found; either a parameter does not exist or the body is missing a necessary key"
       },
-      "42703": { status: 404, msg: "Column Not Found in database" }
+      "42703": { status: 404, msg: "Not Found in database" }
     };
     const msg = errorCodes[err.code].msg;
     const status = errorCodes[err.code].status;

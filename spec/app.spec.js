@@ -53,7 +53,7 @@ describe("/api", () => {
         .get("/api/articles/1")
         .expect(200)
         .then(({ body }) => {
-          expect(body).to.have.keys(
+          expect(body.article).to.have.keys(
             "article_id",
             "author",
             "title",
@@ -81,13 +81,14 @@ describe("/api", () => {
           expect(body.msg).to.equal("Invalid input");
         });
     });
-    it("PATCH updates the votes property of an article", () => {
+    it("PATCH: updates the votes property of an article", () => {
       return request(app)
         .patch("/api/articles/1")
         .send({ inc_votes: 22 })
         .expect(200)
         .then(({ body }) => {
-          expect(body).to.have.keys(
+          expect(body.article.votes).to.equal(122);
+          expect(body.article).to.have.keys(
             "article_id",
             "title",
             "body",
@@ -118,10 +119,36 @@ describe("/api", () => {
     });
     it("ERROR: Non-existent inc_votes", () => {
       return request(app)
-        .patch("/api/articles/notanumber")
+        .patch("/api/articles/1")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Missing votes input");
+        });
+    });
+    it("ERROR: Invalid inc_votes", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: "not a number" })
         .expect(400)
         .then(({ body }) => {
           expect(body.msg).to.equal("Invalid input");
+        });
+    });
+    it("Ignores other keys", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 22, notrelevant: "ssf" })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).to.eql({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            body: "I find this existence challenging",
+            votes: 122,
+            topic: "mitch",
+            author: "butter_bridge",
+            created_at: "2018-11-15T12:21:54.171Z"
+          });
         });
     });
   });
@@ -130,7 +157,17 @@ describe("/api", () => {
       return request(app)
         .post("/api/articles/1/comments")
         .send({ username: "rogersop", body: "This is the body" })
-        .expect(201);
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.comment).to.have.keys(
+            "comment_id",
+            "author",
+            "article_id",
+            "votes",
+            "body",
+            "created_at"
+          );
+        });
     });
     it("ERROR: Patches an article that does not exist", () => {
       return request(app)
@@ -184,6 +221,14 @@ describe("/api", () => {
           expect(body.msg).to.equal("Article Not Found");
         });
     });
+    it("Returns an empty array for an article that has no comments", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).to.have.length(0);
+        });
+    });
     it("ERROR: requests comments for an article that does not exist", () => {
       return request(app)
         .get("/api/articles/notanumber/comments")
@@ -217,7 +262,7 @@ describe("/api", () => {
         .get("/api/articles/1/comments?order_by=desc&&sort_by=notValid")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Column Not Found in database");
+          expect(body.msg).to.equal("Not Found in database");
         });
     });
     it("Defaults to desc if order_by is invalid", () => {
@@ -229,7 +274,7 @@ describe("/api", () => {
         });
     });
   });
-  describe.only("/api/articles", () => {
+  describe("/api/articles", () => {
     it("GET all articles", () => {
       return request(app)
         .get("/api/articles")
@@ -249,10 +294,10 @@ describe("/api", () => {
     });
     it("Accepts a sort_by query", () => {
       return request(app)
-        .get("/api/articles?sort_by=topic")
+        .get("/api/articles?sort_by=votes")
         .expect(200)
         .then(({ body }) => {
-          expect(body.articles).to.be.sortedBy("topic", { descending: true });
+          expect(body.articles).to.be.sortedBy("votes", { descending: true });
         });
     });
 
@@ -261,7 +306,7 @@ describe("/api", () => {
         .get("/api/articles?sort_by=missingColumn")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Column Not Found in database");
+          expect(body.msg).to.equal("Not Found in database");
         });
     });
     it("Accepts an order_by query", () => {
@@ -340,7 +385,7 @@ describe("/api", () => {
           expect(body.articles).to.eql([]);
         });
     });
-    it.only("Filters by both author and topic", () => {
+    it("Filters by both author and topic", () => {
       return request(app)
         .get("/api/articles?topic=mitch&&author=rogersop")
         .expect(200)
@@ -351,13 +396,85 @@ describe("/api", () => {
           });
         });
     });
-    it.only("Returns an empty array if a search is made for a topic and an author that both have no associated articles", () => {
+    it("Returns an empty array if a search is made for a topic and an author that both have no associated articles", () => {
       return request(app)
         .get("/api/articles?topic=paper&&author=lurker")
         .expect(200)
         .then(({ body }) => {
           expect(body.articles).to.eql([]);
         });
+    });
+  });
+  describe("/api/comments/comment_id", () => {
+    it("PATCH: updates the votes property of a comment", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: 22 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).to.have.keys(
+            "comment_id",
+            "author",
+            "article_id",
+            "votes",
+            "body",
+            "created_at"
+          );
+          expect(body.comment.votes).to.equal(38);
+        });
+    });
+    it("ERROR: Patches an article that does not exist", () => {
+      return request(app)
+        .patch("/api/comments/99")
+        .send({ inc_votes: 22 })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Nothing Found");
+        });
+    });
+    it("ERROR: Patches an invalid article_id", () => {
+      return request(app)
+        .patch("/api/comments/notAnId")
+        .send({ inc_votes: 22 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid input");
+        });
+    });
+    it("ERROR: Non-existent inc_votes", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Missing votes input");
+        });
+    });
+    it("Ignores other keys in the request body", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: 22, author: "gg" })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).to.have.keys(
+            "created_at",
+            "votes",
+            "article_id",
+            "body",
+            "author",
+            "comment_id"
+          );
+          expect(body.comment.votes).to.equal(38);
+        });
+    });
+    it("DELETE comment", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(204);
+    });
+    it("ERROR: 404 comment does not exist", () => {
+      return request(app)
+        .delete("/api/comment/99")
+        .expect(404);
     });
   });
 });

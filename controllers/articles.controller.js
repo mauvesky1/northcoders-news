@@ -9,7 +9,7 @@ const { postComment, fetchCommentsById } = require("../models/comments.models");
 const getArticleById = (req, res, next) => {
   fetchArticleById(req.params)
     .then(article => {
-      res.send(article);
+      res.send({ article });
     })
     .catch(err => {
       next(err);
@@ -19,7 +19,7 @@ const getArticleById = (req, res, next) => {
 const updateArticle = (req, res, next) => {
   patchArticle(req.params, req.body)
     .then(article => {
-      res.send(article);
+      res.send({ article });
     })
     .catch(next);
 };
@@ -39,9 +39,7 @@ const getCommentsById = (req, res, next) => {
     .then(comments => {
       res.send({ comments });
     })
-    .catch(err => {
-      next(err);
-    });
+    .catch(next);
 };
 
 const getArticles = (req, res, next) => {
@@ -50,7 +48,6 @@ const getArticles = (req, res, next) => {
       res.send({ articles });
     })
     .catch(err => {
-      console.log(err);
       next(err);
     });
 };

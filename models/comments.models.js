@@ -1,4 +1,5 @@
 const knex = require("../db/connection");
+const { checkArticleExists } = require("../models/articles.models");
 
 exports.postComment = ({ article_id }, { username, body }) => {
   if (username === undefined || body === undefined) {
@@ -28,11 +29,51 @@ exports.fetchCommentsById = (
     .returning("*")
     .then(result => {
       if (result.length === 0) {
-        return Promise.reject({ status: 404, msg: "Article Not Found" });
+        return Promise.all([result, checkArticleExists(article_id)]);
       }
       result.forEach(item => {
         delete item.article_id;
       });
-      return result;
+      return [result];
+    })
+    .then(([result, boolean]) => {
+      if (boolean === undefined || boolean === true) {
+        return result;
+      } else {
+        return Promise.reject({ status: 404, msg: "Article Not Found" });
+      }
+    });
+};
+exports.patchComment = ({ comment_id }, { inc_votes }) => {
+  if (inc_votes === undefined) {
+    return Promise.reject({ status: 400, msg: "Missing votes input" });
+  }
+  return knex
+    .select("*")
+    .from("comments")
+    .where("comment_id", comment_id)
+    .increment("votes", inc_votes)
+    .returning("*")
+    .then(result => {
+      if (result.length === 0) {
+        return Promise.reject({ status: 404, msg: "Nothing Found" });
+      } else {
+        return result[0];
+      }
+    });
+};
+
+exports.deleteComment = ({ comment_id }) => {
+  return knex
+    .select("*")
+    .from("comments")
+    .where("comment_id", comment_id)
+    .del()
+    .then(result => {
+      if (result === 1) {
+        return true;
+      } else {
+        return Promise.reject({ status: 404, msg: "Nothing found" });
+      }
     });
 };

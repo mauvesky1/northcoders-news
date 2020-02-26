@@ -20,6 +20,9 @@ fetchArticleById = ({ article_id }) => {
 };
 
 patchArticle = ({ article_id }, { inc_votes }) => {
+  if (inc_votes === undefined) {
+    return Promise.reject({ status: 400, msg: "Missing votes input" });
+  }
   return knex
     .select("*")
     .from("articles")
@@ -72,7 +75,6 @@ fetchArticles = ({ sort_by = "title", order_by = "desc", author, topic }) => {
       }
     })
     .then(result => {
-      console.log(result[1], result[2]);
       if (
         (result[1] === true && result[2] === true) ||
         (result[1] === undefined && result[2] === true) ||
@@ -110,7 +112,22 @@ checkTopicExists = topic => {
     });
 };
 
+checkArticleExists = article_id => {
+  return knex
+    .select("*")
+    .from("articles")
+    .where("article_id", article_id)
+    .then(list => {
+      if (list.length !== 0) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+};
+
 module.exports = {
+  checkArticleExists,
   fetchArticleById,
   patchArticle,
   fetchArticles,
