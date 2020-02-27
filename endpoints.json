@@ -25,9 +25,26 @@
     }
   },
   "GET /users/:username": {
-    "description": "servers an individual user based on the username given"
+    "description": "serves an individual user based on the username given",
+    "exampleResponse": {}
   },
   "GET /articles/:article_id": {
-    "description": "servers an invividual article based on the article ID given"
-  }
+    "description": "serves an invividual article based on the article ID given"
+  },
+  "PATCH /articles/:article_id": {
+    "description": "updates the number of votes an article has"
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves all comments for the given article"
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "sends a new comment to the website"
+  },
+  "GET /api/comments/:comment_id": {
+    "description": "serves up a comment based on its id"
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "updates the number of votes a comment has"
+  },
+  "DELETE /api/comments/:comment_id": { "description": "deletes a comment" }
 }

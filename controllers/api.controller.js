@@ -1,7 +1,6 @@
 const endpoints = require("../endpoints.json");
 
 const describeAPI = (req, res, next) => {
-  console.log(endpoints);
   res.send(endpoints);
 };
 

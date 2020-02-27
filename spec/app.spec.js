@@ -75,7 +75,6 @@ describe("/api", () => {
         .get("/api/articles/1")
         .expect(200)
         .then(({ body }) => {
-          console.log(body.article);
           expect(body.article).to.have.keys(
             "article_id",
             "author",
@@ -254,7 +253,6 @@ describe("/api", () => {
         .get("/api/articles/2/comments")
         .expect(200)
         .then(({ body }) => {
-          console.log("empty comment array", body);
           expect(body.comments).to.have.length(0);
         });
     });
@@ -419,7 +417,6 @@ describe("/api", () => {
         .get("/api/articles?topic=paper")
         .expect(200)
         .then(({ body }) => {
-          console.log(body.articles);
           expect(body.articles).to.eql([]);
         });
     });
