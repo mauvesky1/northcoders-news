@@ -4,7 +4,8 @@ const {
   updateArticle,
   createComment,
   getCommentsById,
-  getArticles
+  getArticles,
+  sendArticle
 } = require("../controllers/articles.controller");
 
 const { methodNotAllowed } = require("../errors/errors");
@@ -12,6 +13,7 @@ const { methodNotAllowed } = require("../errors/errors");
 articles_Router
   .route("/")
   .get(getArticles)
+  .post(sendArticle)
   .all(methodNotAllowed);
 articles_Router
   .route("/:article_id")

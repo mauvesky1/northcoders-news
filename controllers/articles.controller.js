@@ -1,7 +1,8 @@
 const {
   fetchArticleById,
   patchArticle,
-  fetchArticles
+  fetchArticles,
+  postArticle
 } = require("../models/articles.models");
 
 const { postComment, fetchCommentsById } = require("../models/comments.models");
@@ -12,6 +13,16 @@ const getArticleById = (req, res, next) => {
       res.send({ article });
     })
     .catch(next);
+};
+
+const sendArticle = (req, res, next) => {
+  postArticle(req.body)
+    .then(article => {
+      res.status(201).send({ article });
+    })
+    .catch(err => {
+      next(err);
+    });
 };
 
 const updateArticle = (req, res, next) => {
@@ -46,6 +57,7 @@ const getArticles = (req, res, next) => {
     .catch(next);
 };
 module.exports = {
+  sendArticle,
   getArticleById,
   updateArticle,
   createComment,

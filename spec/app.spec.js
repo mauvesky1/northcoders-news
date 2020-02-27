@@ -301,11 +301,23 @@ describe("/api", () => {
         });
     });
   });
-  describe("/api/articles", () => {
+  describe.only("/api/articles", () => {
     it("Returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/articles")
         .expect(405);
+    });
+    it.only("POST: an article is added to the database", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          author: "rogersop",
+          title: "This IS the note",
+          topic: "mitch",
+          body: "This is the body",
+          created_at: new Date(1471522072389)
+        })
+        .expect(201);
     });
     it("GET all articles", () => {
       return request(app)

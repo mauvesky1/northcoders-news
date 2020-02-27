@@ -1,5 +1,15 @@
 const knex = require("../db/connection");
 
+postArticle = ({ author, title, topic, body, created_at }) => {
+  return knex
+    .insert({ author, title, topic, body, created_at })
+    .into("articles")
+    .returning("*")
+    .then(result => {
+      return result[0];
+    });
+};
+
 fetchArticleById = ({ article_id }) => {
   return knex
     .select("articles.*")
@@ -131,6 +141,7 @@ totalCount = (table, topic, author) => {
 };
 
 module.exports = {
+  postArticle,
   fetchArticleById,
   patchArticle,
   fetchArticles,
