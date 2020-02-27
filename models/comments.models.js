@@ -31,11 +31,7 @@ exports.fetchCommentsById = (
       if (result.length === 0) {
         return Promise.all([
           result,
-          checkExists({
-            table: "articles",
-            field: "article_id",
-            value: article_id
-          })
+          checkExists("articles", "article_id", article_id)
         ]);
       }
       result.forEach(item => {

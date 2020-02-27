@@ -42,11 +42,17 @@ fetchArticles = ({
   author,
   topic,
   limit = 10,
-  offset = 0
+  p = 0
 }) => {
   if (order_by !== "asc" && order_by !== "desc") {
     order_by = "desc";
   }
+
+  let offset = limit * p - limit;
+  if (p === 1 || p === 0) {
+    offset = 0;
+  }
+
   return knex
     .select("articles.*")
     .from("articles")
@@ -74,24 +80,16 @@ fetchArticles = ({
         result,
         checkExists("users", "username", author),
         checkExists("topics", "slug", topic),
-        total_count("articles", topic, author)
+        totalCount("articles", topic, author)
       ]);
     })
-    .then(
-      ([result, checkAuthor, checkTopic, totalCount, totalCountMSearch]) => {
-        if (totalCountMSearch) {
-          if (totalCountMSearch < totalCount) {
-            totalCount = totalCountMSearch;
-          }
-        }
-        console.log(totalCount, "totalCount", result.length, "result length");
-        if (checkAuthor === true && checkTopic === true) {
-          return result;
-        } else {
-          return Promise.reject({ status: 404, msg: "Nothing found" });
-        }
+    .then(([articles, checkAuthor, checkTopic, total_count]) => {
+      if (checkAuthor === true && checkTopic === true) {
+        return { articles, total_count };
+      } else {
+        return Promise.reject({ status: 404, msg: "Nothing found" });
       }
-    );
+    });
 };
 
 checkExists = (table, field, value) => {
@@ -115,7 +113,7 @@ checkExists = (table, field, value) => {
       } else return false;
     });
 };
-total_count = (table, topic, author) => {
+totalCount = (table, topic, author) => {
   return knex
     .select("*")
     .from("articles")

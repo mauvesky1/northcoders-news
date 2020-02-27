@@ -301,7 +301,7 @@ describe("/api", () => {
         });
     });
   });
-  describe.only("/api/articles", () => {
+  describe("/api/articles", () => {
     it("Returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/articles")
@@ -309,9 +309,11 @@ describe("/api", () => {
     });
     it("GET all articles", () => {
       return request(app)
-        .get("/api/articles")
+        .get("/api/articles?")
         .expect(200)
         .then(({ body }) => {
+          expect(body.total_count).to.be.a("number");
+          expect(body.total_count).to.equal(12);
           expect(body.articles[0]).to.have.keys(
             "author",
             "title",
@@ -321,6 +323,22 @@ describe("/api", () => {
             "votes",
             "comment_count"
           );
+        });
+    });
+    it("Accepts a limit query", () => {
+      return request(app)
+        .get("/api/articles?limit=3")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles.length).to.equal(3);
+        });
+    });
+    it("Accepts a p query that determines which page is brought up", () => {
+      return request(app)
+        .get("/api/articles?&&p=2")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles.length).to.equal(2);
         });
     });
     it("Accepts a sort_by query", () => {
