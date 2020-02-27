@@ -29,7 +29,14 @@ exports.fetchCommentsById = (
     .returning("*")
     .then(result => {
       if (result.length === 0) {
-        return Promise.all([result, checkExists({ article_id })]);
+        return Promise.all([
+          result,
+          checkExists({
+            table: "articles",
+            field: "article_id",
+            value: article_id
+          })
+        ]);
       }
       result.forEach(item => {
         delete item.article_id;

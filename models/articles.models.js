@@ -69,42 +69,16 @@ fetchArticles = ({
       result.forEach(article => {
         delete article.body;
       });
-      if (result.length === 0 && author && topic) {
-        return Promise.all([
-          result,
-          checkExists({ author }),
-          checkExists(
-            { topic },
-            total_count("topic", topic, 0),
-            total_count("articles", 0, author)
-          )
-        ]);
-      } else if (result.length === 0 && topic) {
-        return Promise.all([
-          result,
-          true,
-          checkExists({ topic }),
-          total_count("articles", topic, author)
-        ]);
-      } else if (result.length === 0 && author) {
-        return Promise.all([
-          result,
-          checkExists({ author }),
-          true,
-          total_count("articles", topic, author)
-        ]);
-      } else {
-        return Promise.all([
-          result,
-          true,
-          true,
-          total_count("articles", topic, author)
-        ]);
-      }
+
+      return Promise.all([
+        result,
+        checkExists("users", "username", author),
+        checkExists("topics", "slug", topic),
+        total_count("articles", topic, author)
+      ]);
     })
     .then(
       ([result, checkAuthor, checkTopic, totalCount, totalCountMSearch]) => {
-        console.log(totalCount, checkAuthor, checkTopic);
         if (totalCountMSearch) {
           if (totalCountMSearch < totalCount) {
             totalCount = totalCountMSearch;
@@ -120,18 +94,18 @@ fetchArticles = ({
     );
 };
 
-checkExists = ({ topic, author, article_id }) => {
+checkExists = (table, field, value) => {
+  if (value === undefined) {
+    return true;
+  }
   return knex
     .select("*")
     .modify(query => {
-      if (topic) {
-        query.from("topics").where("slug", topic);
+      if (value) {
+        query.from(table).where(field, value);
       }
-      if (author) {
-        query.from("users").where("username", author);
-      }
-      if (article_id) {
-        query.from("articles").where("article_id", article_id);
+      if (value) {
+        query.from(table).where(field, value);
       }
     })
 
@@ -147,11 +121,9 @@ total_count = (table, topic, author) => {
     .from("articles")
     .modify(query => {
       if (author) {
-        console.log("in the author");
         query.where("articles.author", author);
       }
       if (topic) {
-        console.log("in the topic");
         query.where("articles.topic", topic);
       }
     })

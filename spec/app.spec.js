@@ -301,7 +301,7 @@ describe("/api", () => {
         });
     });
   });
-  describe("/api/articles", () => {
+  describe.only("/api/articles", () => {
     it("Returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/articles")
