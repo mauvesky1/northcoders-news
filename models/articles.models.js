@@ -36,7 +36,12 @@ patchArticle = ({ article_id }, { inc_votes }) => {
       return result[0];
     });
 };
-fetchArticles = ({ sort_by = "title", order_by = "desc", author, topic }) => {
+fetchArticles = ({
+  sort_by = "created_at",
+  order_by = "desc",
+  author,
+  topic
+}) => {
   if (order_by !== "asc" && order_by !== "desc") {
     order_by = "desc";
   }
@@ -64,10 +69,10 @@ fetchArticles = ({ sort_by = "title", order_by = "desc", author, topic }) => {
         return Promise.all([
           result,
           checkAuthorExists(author),
-          checkTopicExists(topic)
+          checkTopicExists({ topic })
         ]);
       } else if (result.length === 0 && topic) {
-        return Promise.all([result, , checkTopicExists(topic)]);
+        return Promise.all([result, , checkTopicExists({ topic })]);
       } else if (result.length === 0 && author) {
         return Promise.all([result, checkAuthorExists(author)]);
       } else {
@@ -100,11 +105,18 @@ checkAuthorExists = author => {
     });
 };
 
-checkTopicExists = topic => {
+checkTopicExists = ({ topic, author }) => {
   return knex
-    .select("slug")
-    .from("topics")
-    .where("slug", topic)
+    .select("*")
+    .modify(query => {
+      if (topic) {
+        query.from("topics").where("slug", topic);
+      }
+      if (author) {
+        query.from("users").where("username", author);
+      }
+    })
+
     .then(list => {
       if (list.length !== 0) {
         return true;

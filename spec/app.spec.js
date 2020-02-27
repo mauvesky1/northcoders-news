@@ -18,6 +18,13 @@ describe("/api", () => {
     return connection.seed.run();
   });
 
+  it("Returns with a JSON describing all the endpoints", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body }) => {});
+  });
+
   describe("/topics", () => {
     it("Returns 405 if the method is not allowed", () => {
       return request(app)
@@ -69,6 +76,7 @@ describe("/api", () => {
         .get("/api/articles/1")
         .expect(200)
         .then(({ body }) => {
+          console.log(body.article);
           expect(body.article).to.have.keys(
             "article_id",
             "author",
@@ -79,6 +87,7 @@ describe("/api", () => {
             "votes",
             "comment_count"
           );
+          expect(body.article.comment_count).to.equal(13);
         });
     });
     it("ERROR: Returns a 404 error if the article id is valid but non existent", () => {
@@ -247,6 +256,7 @@ describe("/api", () => {
         .get("/api/articles/2/comments")
         .expect(200)
         .then(({ body }) => {
+          console.log("empty comment array", body);
           expect(body.comments).to.have.length(0);
         });
     });
@@ -315,7 +325,6 @@ describe("/api", () => {
             "votes",
             "comment_count"
           );
-          expect(body.articles[0]);
         });
     });
     it("Accepts a sort_by query", () => {
@@ -343,12 +352,14 @@ describe("/api", () => {
           expect(body.articles).to.be.sortedBy("topic", { ascending: true });
         });
     });
-    it("Defaults to sort_by title in descending order", () => {
+    it("Defaults to sort_by created_at in descending order", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          expect(body.articles).to.be.sortedBy("title", { descending: true });
+          expect(body.articles).to.be.sortedBy("created_at", {
+            descending: true
+          });
         });
     });
     it("Defaults to desc order if order_by is not asc or desc", () => {
@@ -356,7 +367,9 @@ describe("/api", () => {
         .get("/api/articles?order_by=thi1s1sn0tr1ght")
         .expect(200)
         .then(({ body }) => {
-          expect(body.articles).to.be.sortedBy("title", { descending: true });
+          expect(body.articles).to.be.sortedBy("created_at", {
+            descending: true
+          });
         });
     });
     it("Filters the articles by the username value specified in the query", () => {
@@ -408,6 +421,7 @@ describe("/api", () => {
         .get("/api/articles?topic=paper")
         .expect(200)
         .then(({ body }) => {
+          console.log(body.articles);
           expect(body.articles).to.eql([]);
         });
     });
