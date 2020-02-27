@@ -21,8 +21,7 @@ describe("/api", () => {
   it("Returns with a JSON describing all the endpoints", () => {
     return request(app)
       .get("/api")
-      .expect(200)
-      .then(({ body }) => {});
+      .expect(200);
   });
 
   describe("/topics", () => {

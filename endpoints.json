@@ -23,5 +23,11 @@
         }
       ]
     }
+  },
+  "GET /users/:username": {
+    "description": "servers an individual user based on the username given"
+  },
+  "GET /articles/:article_id": {
+    "description": "servers an invividual article based on the article ID given"
   }
 }
