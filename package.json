@@ -12,7 +12,11 @@
     "migrate-rollback": "knex migrate:rollback --all",
     "test": "mocha spec/app.spec.js",
     "setup": "npm run setup-dbs && npm run migrate-latest",
-    "view": " npm run setup-dbs &&  npm run migrate-latest && NODE_ENV=test npm run seed && psql -f view.sql -o view.txt"
+    "view": " npm run setup-dbs &&  npm run migrate-latest && NODE_ENV=test npm run seed && psql -f view.sql -o view.txt",
+    "seed:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex seed:run",
+    "migrate-latest:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:latest",
+    "migrate-rollback:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:rollback",
+    "start": "node listen.js"
   },
   "repository": {
     "type": "git",

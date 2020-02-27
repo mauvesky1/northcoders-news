@@ -87,7 +87,6 @@ describe("/api", () => {
             "votes",
             "comment_count"
           );
-          expect(body.article.comment_count).to.equal(13);
         });
     });
     it("ERROR: Returns a 404 error if the article id is valid but non existent", () => {
@@ -445,7 +444,7 @@ describe("/api", () => {
         });
     });
   });
-  describe("/api/comments/comment_id", () => {
+  describe("/api/comments/:comment_id", () => {
     it("Returns 405 if the method is not allowed", () => {
       return request(app)
         .put("/api/comments/comment_id")

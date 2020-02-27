@@ -68,13 +68,13 @@ fetchArticles = ({
       if (result.length === 0 && author && topic) {
         return Promise.all([
           result,
-          checkAuthorExists(author),
-          checkTopicExists({ topic })
+          checkExists({ author }),
+          checkExists({ topic })
         ]);
       } else if (result.length === 0 && topic) {
-        return Promise.all([result, , checkTopicExists({ topic })]);
+        return Promise.all([result, , checkExists({ topic })]);
       } else if (result.length === 0 && author) {
-        return Promise.all([result, checkAuthorExists(author)]);
+        return Promise.all([result, checkExists({ author })]);
       } else {
         return Promise.all([result]);
       }
@@ -93,19 +93,7 @@ fetchArticles = ({
     });
 };
 
-checkAuthorExists = author => {
-  return knex
-    .select("username")
-    .from("users")
-    .where("username", author)
-    .then(list => {
-      if (list.length !== 0) {
-        return true;
-      } else return false;
-    });
-};
-
-checkTopicExists = ({ topic, author }) => {
+checkExists = ({ topic, author, article_id }) => {
   return knex
     .select("*")
     .modify(query => {
@@ -114,6 +102,9 @@ checkTopicExists = ({ topic, author }) => {
       }
       if (author) {
         query.from("users").where("username", author);
+      }
+      if (article_id) {
+        query.from("articles").where("article_id", article_id);
       }
     })
 
@@ -124,24 +115,9 @@ checkTopicExists = ({ topic, author }) => {
     });
 };
 
-checkArticleExists = article_id => {
-  return knex
-    .select("*")
-    .from("articles")
-    .where("article_id", article_id)
-    .then(list => {
-      if (list.length !== 0) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-};
-
 module.exports = {
-  checkArticleExists,
   fetchArticleById,
   patchArticle,
   fetchArticles,
-  checkAuthorExists
+  checkExists
 };

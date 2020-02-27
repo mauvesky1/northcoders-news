@@ -1,5 +1,5 @@
 const knex = require("../db/connection");
-const { checkArticleExists } = require("../models/articles.models");
+const { checkExists } = require("../models/articles.models");
 
 exports.postComment = ({ article_id }, { username, body }) => {
   if (username === undefined || body === undefined) {
@@ -29,7 +29,7 @@ exports.fetchCommentsById = (
     .returning("*")
     .then(result => {
       if (result.length === 0) {
-        return Promise.all([result, checkArticleExists(article_id)]);
+        return Promise.all([result, checkExists({ article_id })]);
       }
       result.forEach(item => {
         delete item.article_id;
