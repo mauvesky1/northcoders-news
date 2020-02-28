@@ -301,13 +301,13 @@ describe("/api", () => {
         });
     });
   });
-  describe.only("/api/articles", () => {
+  describe("/api/articles", () => {
     it("ERROR: returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/articles")
         .expect(405);
     });
-    it.only("POST: the database accepts a new article", () => {
+    it("POST: the database accepts a new article", () => {
       return request(app)
         .post("/api/articles")
         .send({
@@ -331,7 +331,7 @@ describe("/api", () => {
           );
         });
     });
-    it.only("Ignores irrelevant keys when posting an article", () => {
+    it("Ignores irrelevant keys when posting an article", () => {
       return request(app)
         .post("/api/articles")
         .send({
@@ -355,7 +355,7 @@ describe("/api", () => {
           );
         });
     });
-    it.only("ERROR: Returns a 400 error if only partial information for an article is posted", () => {
+    it("ERROR: Returns a 400 error if partial information for an article is posted", () => {
       return request(app)
         .post("/api/articles")
         .expect(400)
@@ -365,7 +365,7 @@ describe("/api", () => {
     });
     it("GET all articles", () => {
       return request(app)
-        .get("/api/articles?")
+        .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
           expect(body.total_count).to.be.a("number");
@@ -395,6 +395,46 @@ describe("/api", () => {
         .expect(200)
         .then(({ body }) => {
           expect(body.articles.length).to.equal(2);
+        });
+    });
+    it("Defaults to page one if no p query is supplied", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).deep.includes({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            votes: 100,
+            topic: "mitch",
+            author: "butter_bridge",
+            created_at: "2018-11-15T12:21:54.171Z",
+            comment_count: "13"
+          });
+        });
+    });
+    it("Defaults to page one if the p query is not a number", () => {
+      return request(app)
+        .get("/api/articles?p=notanumber")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles.length).to.equal(10);
+        });
+    });
+    it("Defaults to a limit of 10 if limit is not a number", () => {
+      return request(app)
+        .get("/api/articles?limit=notanumber")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles.length).to.equal(10);
+        });
+    });
+    it("Defaults to a limit of 10 if no limit query is supplied", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles.length).to.equal(10);
         });
     });
     it("Accepts a sort_by query", () => {

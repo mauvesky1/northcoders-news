@@ -60,6 +60,12 @@ fetchArticles = ({
     order_by = "desc";
   }
 
+  if (isNaN(limit)) {
+    limit = 10;
+  }
+  if (isNaN(p)) {
+    p = 0;
+  }
   let offset = limit * p - limit;
   if (p === 1 || p === 0) {
     offset = 0;
