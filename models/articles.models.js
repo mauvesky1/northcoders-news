@@ -134,10 +134,8 @@ checkExists = (table, field, value) => {
 };
 totalCount = (table, topic, author) => {
   return knex
-
     .from(table)
     .count("article_id")
-
     .modify(query => {
       if (author) {
         query.where("articles.author", author);
