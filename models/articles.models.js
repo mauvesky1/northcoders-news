@@ -1,6 +1,8 @@
 const knex = require("../db/connection");
 
 postArticle = ({ author, title, topic, body, created_at }) => {
+  if (!author || !title || !topic || !body || !created_at)
+    return Promise.reject({ status: 400, msg: "Missing information" });
   return knex
     .insert({ author, title, topic, body, created_at })
     .into("articles")

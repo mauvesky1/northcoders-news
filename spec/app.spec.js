@@ -25,7 +25,7 @@ describe("/api", () => {
   });
 
   describe("/topics", () => {
-    it("Returns 405 if the method is not allowed", () => {
+    it("ERROR: returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/topics")
         .expect(405);
@@ -42,7 +42,7 @@ describe("/api", () => {
     });
   });
   describe("/users/:username", () => {
-    it("Returns 405 if the method is not allowed", () => {
+    it("ERROR: returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/users/1")
         .expect(405);
@@ -65,7 +65,7 @@ describe("/api", () => {
     });
   });
   describe("/articles/:article_id", () => {
-    it("Returns 405 if the method is not allowed", () => {
+    it("ERROR: returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/articles/1")
         .expect(405);
@@ -175,7 +175,7 @@ describe("/api", () => {
     });
   });
   describe("/api/articles/:article_id/comments", () => {
-    it("Returns 405 if the method is not allowed", () => {
+    it("ERROR: returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/articles/1/comments")
         .expect(405);
@@ -196,7 +196,7 @@ describe("/api", () => {
           );
         });
     });
-    it("ERROR: Patches an article that does not exist", () => {
+    it("ERROR: Posts to an article that does not exist", () => {
       return request(app)
         .post("/api/articles/99/comments")
         .send({ username: "rogersop", body: "This is the body" })
@@ -207,7 +207,7 @@ describe("/api", () => {
           );
         });
     });
-    it("ERROR: Patches an invalid article_id", () => {
+    it("ERROR: Posts to an invalid article_id", () => {
       return request(app)
         .post("/api/articles/notanumber/comments")
         .send({ username: "rogersop", body: "This is the body" })
@@ -302,12 +302,12 @@ describe("/api", () => {
     });
   });
   describe.only("/api/articles", () => {
-    it("Returns 405 if the method is not allowed", () => {
+    it("ERROR: returns 405 if the method is not allowed", () => {
       return request(app)
         .delete("/api/articles")
         .expect(405);
     });
-    it.only("POST: an article is added to the database", () => {
+    it.only("POST: the database accepts a new article", () => {
       return request(app)
         .post("/api/articles")
         .send({
@@ -317,7 +317,51 @@ describe("/api", () => {
           body: "This is the body",
           created_at: new Date(1471522072389)
         })
-        .expect(201);
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.article.article_id).to.equal(13);
+          expect(body.article).to.have.keys(
+            "article_id",
+            "created_at",
+            "votes",
+            "topic",
+            "body",
+            "author",
+            "title"
+          );
+        });
+    });
+    it.only("Ignores irrelevant keys when posting an article", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          author: "rogersop",
+          title: "This IS the note",
+          topic: "mitch",
+          body: "This is the body",
+          created_at: new Date(1471522072389),
+          anotherKey: "Ignored"
+        })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.article).to.have.keys(
+            "article_id",
+            "created_at",
+            "votes",
+            "topic",
+            "body",
+            "author",
+            "title"
+          );
+        });
+    });
+    it.only("ERROR: Returns a 400 error if only partial information for an article is posted", () => {
+      return request(app)
+        .post("/api/articles")
+        .expect(400)
+        .expect(({ body }) => {
+          expect(body.msg).to.equal("Missing information");
+        });
     });
     it("GET all articles", () => {
       return request(app)
@@ -378,7 +422,7 @@ describe("/api", () => {
           expect(body.articles).to.be.sortedBy("topic", { ascending: true });
         });
     });
-    it("Defaults to sort_by created_at in descending order", () => {
+    it("Defaults sort_by created_at in descending order", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
@@ -471,7 +515,7 @@ describe("/api", () => {
     });
   });
   describe("/api/comments/:comment_id", () => {
-    it("Returns 405 if the method is not allowed", () => {
+    it("ERROR: returns 405 if the method is not allowed", () => {
       return request(app)
         .put("/api/comments/comment_id")
         .expect(405);
