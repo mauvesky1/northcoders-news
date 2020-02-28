@@ -7,6 +7,7 @@ postArticle = ({ author, title, topic, body, created_at }) => {
     .insert({ author, title, topic, body, created_at })
     .into("articles")
     .returning("*")
+
     .then(result => {
       return result[0];
     });
@@ -133,8 +134,10 @@ checkExists = (table, field, value) => {
 };
 totalCount = (table, topic, author) => {
   return knex
-    .select("*")
-    .from("articles")
+
+    .from(table)
+    .count("article_id")
+
     .modify(query => {
       if (author) {
         query.where("articles.author", author);
@@ -143,8 +146,9 @@ totalCount = (table, topic, author) => {
         query.where("articles.topic", topic);
       }
     })
+    .returning()
     .then(result => {
-      return result.length;
+      return result[0].count;
     });
 };
 

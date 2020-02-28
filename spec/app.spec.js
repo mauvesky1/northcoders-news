@@ -368,8 +368,7 @@ describe("/api", () => {
         .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          expect(body.total_count).to.be.a("number");
-          expect(body.total_count).to.equal(12);
+          expect(body.total_count).to.equal("12");
           expect(body.articles[0]).to.have.keys(
             "author",
             "title",
@@ -386,6 +385,7 @@ describe("/api", () => {
         .get("/api/articles?limit=3")
         .expect(200)
         .then(({ body }) => {
+          expect(body.total_count).to.equal("12");
           expect(body.articles.length).to.equal(3);
         });
     });
