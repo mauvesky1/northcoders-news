@@ -230,7 +230,6 @@ describe("/api", () => {
         .get("/api/articles/1/comments")
         .expect(200)
         .then(({ body }) => {
-          console.log(body);
           expect(body.comments).to.have.length(13);
           expect(body.comments[0]).to.have.keys(
             "author",
