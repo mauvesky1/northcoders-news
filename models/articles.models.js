@@ -55,7 +55,7 @@ fetchArticles = ({
   author,
   topic,
   limit = 10,
-  p = 0
+  p = 1
 }) => {
   if (order_by !== "asc" && order_by !== "desc") {
     order_by = "desc";
@@ -73,7 +73,14 @@ fetchArticles = ({
   }
 
   return knex
-    .select("articles.*")
+    .select(
+      "articles.article_id",
+      "articles.title",
+      "articles.votes",
+      "articles.topic",
+      "articles.author",
+      "articles.created_at"
+    )
     .from("articles")
     .count({ comment_count: "comment_id" })
     .leftJoin("comments", "articles.article_id", "comments.article_id")
@@ -91,9 +98,7 @@ fetchArticles = ({
       }
     })
     .then(result => {
-      result.forEach(article => {
-        delete article.body;
-      });
+      console.log(result);
 
       return Promise.all([
         result,

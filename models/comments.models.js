@@ -34,7 +34,7 @@ exports.fetchCommentsById = (
           checkExists("articles", "article_id", article_id)
         ]);
       }
-      console.log(result);
+
       result.forEach(item => {
         delete item.article_id;
       });
